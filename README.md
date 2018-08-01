@@ -1,4 +1,4 @@
-# Kirby Quickselect v1.3 <a href="https://www.paypal.me/medienbaecker"><img width="99" src="http://www.medienbaecker.com/beer.png" alt="Buy me a beer" align="right"></a>
+# Kirby Quickselect v1.4 <a href="https://www.paypal.me/medienbaecker"><img width="99" src="http://www.medienbaecker.com/beer.png" alt="Buy me a beer" align="right"></a>
 
 This field is based on the core select field and adds a filter and placeholder functionality. It uses the [select2](https://github.com/select2/select2) jQuery plugin.
 
@@ -25,3 +25,44 @@ Just like you do with the regular `select` field, you can specify what elements 
 Anything that's printed in the list can be searched for. So if you set the `text` of a `query` to `{{title}} ({{uri}})`, you can find pages by their ancestors, too.
 
 Compared to the core `select` field, you can also define a `placeholder` that can make things clearer for the editor.
+
+### Controller option:
+
+This field is extended with an option to use a user specified function to have even more control of the options that will be loaded. The idea is taken from the Controlled List plugin.
+
+#### Example
+
+Create a simple plugin that lets you choose from the panel users.
+
+site/plugins/myplugin/myplugin.php:
+
+```
+class MyPlugin {
+  static function userlist($field) {
+    $kirby = kirby();
+    $site = $kirby->site();
+    $users = $site->users();
+
+    $result = array();
+
+    foreach ($users as $user) {
+      if (!empty($user->firstName()) && !empty($user->lastName())) {
+        $result[$user->username()] = $user->firstName() . ' ' . $user->lastName();
+      } else {
+        $result[$user->username()] = $user->username();
+      }
+    }
+
+    return $result;
+  }
+}
+```
+
+In your blueprint:
+
+```
+users:
+  label: Users
+  type: relationship
+  controller: MyPlugin::userlist
+```

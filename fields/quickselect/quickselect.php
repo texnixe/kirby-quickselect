@@ -2,16 +2,29 @@
 
 class QuickselectField extends SelectField {
 	static public $fieldname = 'quickselect';
+	public $controller;
 	static public $assets = array(
-    'js' => array(
-      'select2.js',
-      'select.js'
-    ),
-    'css' => array(
-      'select2.css',
-      'select.css'
-    )
-  );
+	    'js' => array(
+	      'select2.js',
+	      'select.js'
+	    ),
+	    'css' => array(
+	      'select2.css',
+	      'select.css'
+	    )
+	  );
+
+
+	/**
+	 * This field can load a user specified function if set in the blueprint.
+	 */
+	public function options() {
+		if ($this->controller()) {
+			return call_user_func($this->controller(), $this);
+		} else {
+			return parent::options();
+		}
+	}
 
 	public function input() {
 		$select = new Brick('select');
@@ -35,7 +48,7 @@ class QuickselectField extends SelectField {
 		}
 
 		foreach($this->options() as $value => $text) {
-		  
+
 		  if(strpos($value, ".jpg")  !== false OR
 		     strpos($value, ".jpeg") !== false OR
 		     strpos($value, ".gif")  !== false OR
@@ -43,35 +56,35 @@ class QuickselectField extends SelectField {
 	       if (!strpos(implode(",", $select->attr("class")), "images")  !== false) {
            $select->addClass("images");
          }
-         
+
          if($image = $this->page()->image($value)) {
            $image = $image->crop(75, 75)->url();
            $select->append(
              $this->option($value, $text, $this->value() == $value)->attr("data-image", $image)
-           );   
+           );
          }
          else {
             $select->append(
               $this->option($value, $text, $this->value() == $value)
             );
          }
- 
+
 		  }
 		  else {
-        
+
         $select->append(
           $this->option($value, $text, $this->value() == $value)
         );
-        
+
       }
-			
+
 		}
-		
+
 		$noresults = $this->i18n([
       'en'    => "Nothing found",
       'de'    => "Nichts gefunden"
     ]);
-    
+
 
 		$select->attr("data-noresults", $noresults);
 		$select->attr("style", "width: 100%");
